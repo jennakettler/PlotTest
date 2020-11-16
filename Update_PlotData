@@ -1,0 +1,56 @@
+
+library(tidyverse)
+
+# reading Biomass and Plot Data as csv files
+Biomass <- read.csv("20200927_BiomassPlotData.csv", header=TRUE)
+PlotData <- read.csv("20200923_SeptemberPlotData_v1.csv", header=FALSE)
+
+#convert to data frame, change row names, transpose TPlotData
+PlotData <- rownames_to_column(PlotData, var = "Block")
+PlotData <- t(PlotData)
+PlotData<-as.data.frame(PlotData)
+
+#removes filler row
+names(PlotData)<-PlotData[1,]
+PlotData<-PlotData[-1,]
+
+#makes column headers as the first row and removes first row
+colnames(PlotData)<-as.character(unlist(PlotData[1,]))
+PlotData<-PlotData[-1,]
+
+#reorder columns, remove alive column
+PlotData <- PlotData[,c(1,2,4,6,3,5,7,8,9,10,11,12,13,14,15,16,17)]
+PlotData$Alive <- NULL
+
+#rename necessary columns to match Biomass data, rename unused columns to delete
+colnames(PlotData)[colnames(PlotData) == "Plant_num"] <- "Plant"
+colnames(PlotData)[colnames(PlotData) == "Plant_spec"] <- "Species"
+colnames(PlotData)[colnames(PlotData) == ""] <- "A"
+colnames(PlotData)[colnames(PlotData) == ".1"] <- "B"
+colnames(PlotData)[colnames(PlotData) == ".2"] <- "C"
+colnames(PlotData)[colnames(PlotData) == ".3"] <- "D"
+
+#delete unused columns
+PlotData$A <- NULL
+PlotData$B <- NULL
+PlotData$C <- NULL
+PlotData$D <- NULL
+
+as_tibble(Biomass)
+as_tibble(PlotData)
+# chr to integer/double
+# plant species as chr
+
+#convert three columns to numeric
+cols.num <- c("Block", "Plot", "Plant")
+PlotData[cols.num] <-sapply(PlotData[cols.num], as.integer)
+sapply(PlotData, class)
+
+#rearrange biomass data
+Biomass <- Biomass[,c(1,2,4,3,5)]
+
+#attempt to merge data
+PlotBio <- merge(PlotData, Biomass)
+
+
+                
